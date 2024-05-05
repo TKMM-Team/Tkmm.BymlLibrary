@@ -8,12 +8,15 @@ on:
 env:
   nuget: "https://api.nuget.org/v3/index.json"
   project_name: BymlLibrary
-  authors: ArchLeaders
+  package_name: Tkmm.BymlLibrary
+  authors: TKMM-Team
   description: |-
     Modern BYML IO library written in managed C#. Supports versions 2 to 7.
+
+    Adds additional BYML types used for changelogs.
   readme: ./Readme.md
   icon: ./Icon.png
-  repo: https://github.com/EPD-Libraries/BymlLibrary
+  repo: https://github.com/TKMM-Team/Tkmm.BymlLibrary
   spdx: AGPL-3.0-or-later
   tags: binary-yaml;byml;byaml;yml;zeldamods;epd;totk;botw;byml-v7
 
@@ -55,6 +58,7 @@ jobs:
           --no-restore                                                           \
           -c Release                                                             \
           -o ./build-output/                                                     \
+          -p:PackageId="${{ env.package_name }}"                                 \
           -p:Authors="${{ env.authors }}"                                        \
           -p:Description="${{ env.description }}"                                \
           -p:PackageLicenseExpression="${{ env.spdx }}"                          \
