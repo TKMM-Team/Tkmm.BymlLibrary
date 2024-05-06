@@ -233,6 +233,13 @@ public readonly ref struct ImmutableByml
         return ref _data[_value.Offset..].Read<double>();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly ref BymlChangelog GetChangelog()
+    {
+        Type.Assert(BymlNodeType.Changelog);
+        return ref _data[_value.Offset..].Read<BymlChangelog>();
+    }
+
     public bool IsNull {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Type == BymlNodeType.Null;

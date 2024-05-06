@@ -52,6 +52,7 @@ public static class BymlNodeExtensions
             BymlNodeType.Int or
             BymlNodeType.Float or
             BymlNodeType.UInt32 or
+            BymlNodeType.Changelog or
             BymlNodeType.Null;
     }
 }

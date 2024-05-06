@@ -13,6 +13,11 @@ using VYaml.Emitter;
 
 namespace BymlLibrary;
 
+public enum BymlChangelog
+{
+    Remove
+}
+
 public enum BymlNodeType : byte
 {
     // A better solution could be
@@ -39,6 +44,7 @@ public enum BymlNodeType : byte
     Int64 = 0xD4,
     UInt64 = 0xD5,
     Double = 0xD6,
+    Changelog = 0xFE,
     Null = 0xFF,
 }
 
@@ -119,6 +125,8 @@ public sealed class Byml
                 => new(byml.GetUInt64()),
             BymlNodeType.Double
                 => new(byml.GetDouble()),
+            BymlNodeType.Changelog
+                => new(BymlChangelog.Remove),
             BymlNodeType.Null
                 => new(),
 
@@ -202,7 +210,7 @@ public sealed class Byml
     public static implicit operator Byml(Byml[] array) => new(array);
     public Byml(IEnumerable<Byml> array)
     {
-        Type = BymlNodeType.HashMap32;
+        Type = BymlNodeType.Array;
         Value = new BymlArray(array);
     }
 
@@ -297,6 +305,13 @@ public sealed class Byml
         Value = value;
     }
 
+    public static implicit operator Byml(BymlChangelog value) => new(value);
+    public Byml(BymlChangelog value)
+    {
+        Type = BymlNodeType.Changelog;
+        Value = value;
+    }
+
     public Byml()
     {
         Type = BymlNodeType.Null;
@@ -359,6 +374,10 @@ public sealed class Byml
         => Get<double>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public BymlChangelog GetChangelog()
+        => Get<BymlChangelog>();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Get<T>()
     {
         if (Value is null) {
@@ -417,6 +436,7 @@ public sealed class Byml
                 BymlNodeType.Int64 => x.GetInt64() == y.GetInt64(),
                 BymlNodeType.UInt64 => x.GetUInt64() == y.GetUInt64(),
                 BymlNodeType.Double => x.GetDouble() == y.GetDouble(),
+                BymlNodeType.Changelog => x.GetChangelog() == y.GetChangelog(),
                 _ => throw new NotImplementedException($"""
                     A comparer for the node type '{x.Type}' is not implemented
                     """),

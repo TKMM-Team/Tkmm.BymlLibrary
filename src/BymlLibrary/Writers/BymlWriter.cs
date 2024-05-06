@@ -122,6 +122,10 @@ internal class BymlWriter
                 Writer.Write(byml.GetFloat());
                 break;
             }
+            case BymlNodeType.Changelog: {
+                Writer.Write(byml.GetChangelog());
+                break;
+            }
             case BymlNodeType.Null: {
                 Writer.Write(0);
                 break;
