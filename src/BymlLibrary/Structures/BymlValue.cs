@@ -27,5 +27,5 @@ internal struct BymlValue(int value)
     public bool Bool;
 
     [FieldOffset(0)]
-    public BymlChangelog Changelog;
+    public BymlChangeType Changelog;
 }

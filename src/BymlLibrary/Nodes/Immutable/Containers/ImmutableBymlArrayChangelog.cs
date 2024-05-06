@@ -40,16 +40,17 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get {
             Entry entry = _entries[index];
-            return new(entry.Index, _data, entry.Value, _types[index]);
+            return new(entry.Index, entry.Change, _data, entry.Value, _types[index]);
         }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4, Size = SIZE)]
     private readonly struct Entry
     {
-        public const int SIZE = 8;
+        public const int SIZE = 12;
 
         public readonly int Index;
+        public readonly BymlChangeType Change;
         public readonly int Value;
 
         public class Reverser : IStructReverser
@@ -58,6 +59,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
             {
                 slice[0..4].Reverse();
                 slice[4..8].Reverse();
+                slice[8..12].Reverse();
             }
         }
     }
@@ -92,8 +94,8 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     public BymlArrayChangelog ToMutable(in ImmutableByml root)
     {
         BymlArrayChangelog arrayChangelog = [];
-        foreach (var (key, value) in this) {
-            arrayChangelog[key] = Byml.FromImmutable(value, root);
+        foreach (var (key, change, value) in this) {
+            arrayChangelog[key] = (change, Byml.FromImmutable(value, root));
         }
 
         return arrayChangelog;
@@ -103,14 +105,16 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     internal unsafe void EmitYaml(ref Utf8YamlEmitter emitter, in ImmutableByml root)
     {
         emitter.Tag("!array-changelog");
-        emitter.BeginMapping((Count < Byml.YamlConfig.InlineContainerMaxCount && !HasContainerNodes()) switch {
-            true => MappingStyle.Flow,
-            false => MappingStyle.Block,
-        });
+        emitter.BeginMapping();
 
-        foreach (var (index, node) in this) {
+        foreach (var (index, change, node) in this) {
             emitter.WriteInt32(index);
-            BymlYamlWriter.Write(ref emitter, node, root);
+            emitter.BeginMapping(MappingStyle.Flow);
+            {
+                emitter.WriteString(change.ToString());
+                BymlYamlWriter.Write(ref emitter, node, root);
+            }
+            emitter.EndMapping();
         }
 
         emitter.EndMapping();
@@ -119,7 +123,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool HasContainerNodes()
     {
-        foreach (var (_, node) in this) {
+        foreach (var (_, _, node) in this) {
             if (node.Type.IsContainerType()) {
                 return true;
             }

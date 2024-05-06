@@ -47,7 +47,7 @@ internal class BymlYamlReader
                 "ul" or "u64" => parser.ReadScalarAsUInt64(),
                 "f" or "f32" => parser.ReadScalarAsFloat(),
                 "d" or "f64" => parser.ReadScalarAsDouble(),
-                "changelog" => Enum.Parse<BymlChangelog>(parser.ReadScalarAsString() ?? string.Empty),
+                "changelog" => Enum.Parse<BymlChangeType>(parser.ReadScalarAsString() ?? string.Empty),
                 "binary" or "tag:yaml.org,2002:binary" => Convert.FromBase64String(parser.ReadScalarAsString()
                     ?? throw new InvalidDataException("""
                         Invalid binary data, expected a base64 string
@@ -169,7 +169,14 @@ internal class BymlYamlReader
         parser.SkipAfter(ParseEventType.MappingStart);
 
         while (parser.CurrentEventType is not ParseEventType.MappingEnd) {
-            arrayChangelog[parser.ReadScalarAsInt32()] = Parse(ref parser);
+            int indexKey = parser.ReadScalarAsInt32();
+
+            parser.SkipAfter(ParseEventType.MappingStart);
+            arrayChangelog[indexKey] = (
+                Enum.Parse<BymlChangeType>(parser.ReadScalarAsString() ?? string.Empty),
+                Parse(ref parser)
+            );
+            parser.SkipAfter(ParseEventType.MappingEnd);
         }
 
         parser.SkipAfter(ParseEventType.MappingEnd);

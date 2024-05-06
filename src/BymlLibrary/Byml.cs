@@ -13,8 +13,10 @@ using VYaml.Emitter;
 
 namespace BymlLibrary;
 
-public enum BymlChangelog
+public enum BymlChangeType
 {
+    Add,
+    Edit,
     Remove
 }
 
@@ -129,7 +131,7 @@ public sealed class Byml
             BymlNodeType.Double
                 => new(byml.GetDouble()),
             BymlNodeType.Changelog
-                => new(BymlChangelog.Remove),
+                => new(BymlChangeType.Remove),
             BymlNodeType.Null
                 => new(),
 
@@ -210,8 +212,8 @@ public sealed class Byml
         Value = hashMap64;
     }
 
-    public static implicit operator Byml(Dictionary<int, Byml> hashMap32) => new(hashMap32);
-    public Byml(IDictionary<int, Byml> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
+    public static implicit operator Byml(Dictionary<int, (BymlChangeType, Byml)> arrayChangelog) => new(arrayChangelog);
+    public Byml(IDictionary<int, (BymlChangeType, Byml)> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
     {
     }
 
@@ -320,8 +322,8 @@ public sealed class Byml
         Value = value;
     }
 
-    public static implicit operator Byml(BymlChangelog value) => new(value);
-    public Byml(BymlChangelog value)
+    public static implicit operator Byml(BymlChangeType value) => new(value);
+    public Byml(BymlChangeType value)
     {
         Type = BymlNodeType.Changelog;
         Value = value;
@@ -393,8 +395,8 @@ public sealed class Byml
         => Get<double>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public BymlChangelog GetChangelog()
-        => Get<BymlChangelog>();
+    public BymlChangeType GetChangelog()
+        => Get<BymlChangeType>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Get<T>()
