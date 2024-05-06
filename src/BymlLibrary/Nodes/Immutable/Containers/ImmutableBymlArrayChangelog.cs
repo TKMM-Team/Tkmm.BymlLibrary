@@ -121,18 +121,6 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool HasContainerNodes()
-    {
-        foreach (var (_, _, node) in this) {
-            if (node.Type.IsContainerType()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Reverse(ref RevrsReader reader, int offset, int count, in HashSet<int> reversedOffsets)
     {
         for (int i = 0; i < count; i++) {
