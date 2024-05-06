@@ -234,10 +234,10 @@ public readonly ref struct ImmutableByml
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly ref BymlChangelog GetChangelog()
+    public readonly BymlChangelog GetChangelog()
     {
         Type.Assert(BymlNodeType.Changelog);
-        return ref _data[_value.Offset..].Read<BymlChangelog>();
+        return _value.Changelog;
     }
 
     public bool IsNull {
