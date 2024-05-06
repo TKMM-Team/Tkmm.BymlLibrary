@@ -9,15 +9,14 @@ return;
 using BymlLibrary;
 using Revrs;
 
-byte[] buffer = File.ReadAllBytes(args[0]);
-
-RevrsReader reader = new(buffer);
-ImmutableByml byml = new(ref reader);
-
-string yaml = byml.ToYaml();
-File.WriteAllText(args[2], yaml);
-
+string yaml = File.ReadAllText(args[0]);
 Byml fromYaml = Byml.FromText(yaml);
-File.WriteAllBytes(args[1], fromYaml.ToBinary(byml.Endianness));
+
+byte[] toBinary = fromYaml.ToBinary(Endianness.Little, version: 2);
+Byml fromBinary = Byml.FromBinary(toBinary);
+File.WriteAllBytes(args[1], toBinary);
+
+string fromBinaryToYaml = fromBinary.ToYaml();
+File.WriteAllText(args[2], fromBinaryToYaml);
 
 #endif
