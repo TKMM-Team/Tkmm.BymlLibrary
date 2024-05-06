@@ -115,6 +115,7 @@ internal class BymlYamlReader
                 "h32" => ParseHashMap32(ref parser),
                 "h64" => ParseHashMap64(ref parser),
                 "file" => ParseFile(ref parser),
+                "array-changelog" => ParseArrayChangelog(ref parser),
                 _ => throw new InvalidDataException($"""
                     Unexpected YAML map tag '{tag}' (expected '!h32', '!h64' or '!!file')
                     """),
@@ -159,6 +160,20 @@ internal class BymlYamlReader
 
         parser.SkipAfter(ParseEventType.MappingEnd);
         return map;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static Byml ParseArrayChangelog(ref YamlParser parser)
+    {
+        BymlArrayChangelog arrayChangelog = [];
+        parser.SkipAfter(ParseEventType.MappingStart);
+
+        while (parser.CurrentEventType is not ParseEventType.MappingEnd) {
+            arrayChangelog[parser.ReadScalarAsInt32()] = Parse(ref parser);
+        }
+
+        parser.SkipAfter(ParseEventType.MappingEnd);
+        return arrayChangelog;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]

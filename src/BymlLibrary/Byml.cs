@@ -44,6 +44,7 @@ public enum BymlNodeType : byte
     Int64 = 0xD4,
     UInt64 = 0xD5,
     Double = 0xD6,
+    ArrayChangelog = 0xFD,
     Changelog = 0xFE,
     Null = 0xFF,
 }
@@ -101,6 +102,8 @@ public sealed class Byml
                 => new(byml.GetHashMap32().ToMutable(root)),
             BymlNodeType.HashMap64
                 => new(byml.GetHashMap64().ToMutable(root)),
+            BymlNodeType.ArrayChangelog
+                => new(byml.GetArrayChangelog().ToMutable(root)),
             BymlNodeType.String
                 => new(root.StringTable[byml.GetStringIndex()].ToManaged()),
             BymlNodeType.Binary
@@ -205,6 +208,18 @@ public sealed class Byml
     {
         Type = BymlNodeType.HashMap64;
         Value = hashMap64;
+    }
+
+    public static implicit operator Byml(Dictionary<int, Byml> hashMap32) => new(hashMap32);
+    public Byml(IDictionary<int, Byml> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
+    {
+    }
+
+    public static implicit operator Byml(BymlArrayChangelog arrayChangelog) => new(arrayChangelog);
+    public Byml(BymlArrayChangelog arrayChangelog)
+    {
+        Type = BymlNodeType.ArrayChangelog;
+        Value = arrayChangelog;
     }
 
     public static implicit operator Byml(Byml[] array) => new(array);
@@ -324,6 +339,10 @@ public sealed class Byml
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BymlHashMap64 GetHashMap64()
         => Get<BymlHashMap64>();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public BymlArrayChangelog GetArrayChangelog()
+        => Get<BymlArrayChangelog>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BymlArray GetArray()

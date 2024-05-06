@@ -22,6 +22,7 @@ public static class BymlNodeExtensions
         return type is
             BymlNodeType.HashMap32 or
             BymlNodeType.HashMap64 or
+            BymlNodeType.ArrayChangelog or
             BymlNodeType.RelocatedHashMap32 or
             BymlNodeType.RelocatedHashMap64 or
             BymlNodeType.Array or

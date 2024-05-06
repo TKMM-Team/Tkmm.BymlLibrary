@@ -1,5 +1,5 @@
 ﻿using BymlLibrary.Extensions;
-using BymlLibrary.Nodes.Containers.HashMap;
+using BymlLibrary.Nodes.Containers;
 using BymlLibrary.Structures;
 using BymlLibrary.Yaml;
 using Revrs;
@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using VYaml.Emitter;
 
-namespace BymlLibrary.Nodes.Immutable.Containers.HashMap;
+namespace BymlLibrary.Nodes.Immutable.Containers;
 
-public readonly ref struct ImmutableBymlHashMap32(Span<byte> data, int offset, int count)
+public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offset, int count)
 {
     /// <summary>
     /// Span of the BYMl data
@@ -36,11 +36,11 @@ public readonly ref struct ImmutableBymlHashMap32(Span<byte> data, int offset, i
         : data[(offset + BymlContainer.SIZE + (Entry.SIZE * count))..]
             .ReadSpan<BymlNodeType>(count);
 
-    public readonly ImmutableBymlHashMap32Entry this[int index] {
+    public readonly ImmutableBymlArrayChangelogEntry this[int index] {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get {
             Entry entry = _entries[index];
-            return new(entry.Hash, _data, entry.Value, _types[index]);
+            return new(entry.Index, _data, entry.Value, _types[index]);
         }
     }
 
@@ -49,7 +49,7 @@ public readonly ref struct ImmutableBymlHashMap32(Span<byte> data, int offset, i
     {
         public const int SIZE = 8;
 
-        public readonly uint Hash;
+        public readonly int Index;
         public readonly int Value;
 
         public class Reverser : IStructReverser
@@ -67,12 +67,12 @@ public readonly ref struct ImmutableBymlHashMap32(Span<byte> data, int offset, i
         => new(this);
 
     [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref struct Enumerator(ImmutableBymlHashMap32 container)
+    public ref struct Enumerator(ImmutableBymlArrayChangelog container)
     {
-        private readonly ImmutableBymlHashMap32 _container = container;
+        private readonly ImmutableBymlArrayChangelog _container = container;
         private int _index = -1;
 
-        public readonly ImmutableBymlHashMap32Entry Current {
+        public readonly ImmutableBymlArrayChangelogEntry Current {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _container[_index];
         }
@@ -89,27 +89,27 @@ public readonly ref struct ImmutableBymlHashMap32(Span<byte> data, int offset, i
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public BymlHashMap32 ToMutable(in ImmutableByml root)
+    public BymlArrayChangelog ToMutable(in ImmutableByml root)
     {
-        BymlHashMap32 hashMap32 = [];
-        foreach ((var key, var value) in this) {
-            hashMap32[key] = Byml.FromImmutable(value, root);
+        BymlArrayChangelog arrayChangelog = [];
+        foreach (var (key, value) in this) {
+            arrayChangelog[key] = Byml.FromImmutable(value, root);
         }
 
-        return hashMap32;
+        return arrayChangelog;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal unsafe void EmitYaml(ref Utf8YamlEmitter emitter, in ImmutableByml root)
     {
-        emitter.Tag("!h32");
+        emitter.Tag("!array-changelog");
         emitter.BeginMapping((Count < Byml.YamlConfig.InlineContainerMaxCount && !HasContainerNodes()) switch {
             true => MappingStyle.Flow,
             false => MappingStyle.Block,
         });
 
-        foreach (var (hash, node) in this) {
-            emitter.WriteUInt32(hash);
+        foreach (var (index, node) in this) {
+            emitter.WriteInt32(index);
             BymlYamlWriter.Write(ref emitter, node, root);
         }
 

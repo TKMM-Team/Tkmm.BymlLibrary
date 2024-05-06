@@ -138,6 +138,14 @@ public readonly ref struct ImmutableByml
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ImmutableBymlArrayChangelog GetArrayChangelog()
+    {
+        ref BymlContainer header
+            = ref CheckContainerHeader(BymlNodeType.ArrayChangelog);
+        return new ImmutableBymlArrayChangelog(_data, _value.Offset, header.Count);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ImmutableBymlMap GetMap()
     {
         ref BymlContainer header

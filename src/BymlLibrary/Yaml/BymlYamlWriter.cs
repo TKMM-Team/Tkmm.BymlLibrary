@@ -26,6 +26,9 @@ public static class BymlYamlWriter
             case BymlNodeType.HashMap64:
                 byml.GetHashMap64().EmitYaml(ref emitter, root);
                 break;
+            case BymlNodeType.ArrayChangelog:
+                byml.GetArrayChangelog().EmitYaml(ref emitter, root);
+                break;
             case BymlNodeType.String:
                 WriteRawString(ref emitter, byml.GetStringIndex(), root.StringTable);
                 break;
