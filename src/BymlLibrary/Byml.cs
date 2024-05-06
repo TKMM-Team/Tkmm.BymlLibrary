@@ -224,7 +224,7 @@ public sealed class Byml
     public static implicit operator Byml(Dictionary<string, Byml> map) => new(map);
     public Byml(IDictionary<string, Byml> map)
     {
-        Type = BymlNodeType.HashMap32;
+        Type = BymlNodeType.Map;
         Value = new BymlMap(map);
     }
 
