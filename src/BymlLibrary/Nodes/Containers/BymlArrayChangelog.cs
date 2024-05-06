@@ -1,4 +1,5 @@
 ﻿using BymlLibrary.Extensions;
+using BymlLibrary.Nodes.Containers.HashMap;
 using BymlLibrary.Writers;
 using BymlLibrary.Yaml;
 using System.Diagnostics.CodeAnalysis;
@@ -86,5 +87,41 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
         }
 
         context.Writer.Align(4);
+    }
+
+    public class ValueEqualityComparer : IEqualityComparer<BymlArrayChangelog>
+    {
+        public bool Equals(BymlArrayChangelog? x, BymlArrayChangelog? y)
+        {
+            if (x is null || y is null) {
+                return y == x;
+            }
+
+            if (x.Count != y.Count) {
+                return false;
+            }
+
+            return x.Keys.SequenceEqual(y.Keys) && x.Values.SequenceEqual(y.Values, EntryValueEqualityComparer.Default);
+        }
+
+        public int GetHashCode([DisallowNull] BymlArrayChangelog obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    private class EntryValueEqualityComparer : IEqualityComparer<(BymlChangeType Change, Byml Node)>
+    {
+        public static readonly EntryValueEqualityComparer Default = new();
+
+        public bool Equals((BymlChangeType Change, Byml Node) x, (BymlChangeType Change, Byml Node) y)
+        {
+            return x.Change == y.Change && Byml.ValueEqualityComparer.Default.Equals(x.Node, y.Node);
+        }
+
+        public int GetHashCode([DisallowNull] (BymlChangeType, Byml) obj)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

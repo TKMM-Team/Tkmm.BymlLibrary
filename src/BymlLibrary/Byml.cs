@@ -422,6 +422,7 @@ public sealed class Byml
     {
         private static readonly BymlHashMap32.ValueEqualityComparer _hashMap32Comparer = new();
         private static readonly BymlHashMap64.ValueEqualityComparer _hashMap64Comparer = new();
+        private static readonly BymlArrayChangelog.ValueEqualityComparer _bymlArrayChangelogComparer = new();
         private static readonly BymlArray.ValueEqualityComparer _arrayComparer = new();
         private static readonly BymlMap.ValueEqualityComparer _mapComparer = new();
         private static readonly ValueEqualityComparer _default = new();
@@ -445,6 +446,7 @@ public sealed class Byml
             return x.Type switch {
                 BymlNodeType.HashMap32 => _hashMap32Comparer.Equals(x.GetHashMap32(), y.GetHashMap32()),
                 BymlNodeType.HashMap64 => _hashMap64Comparer.Equals(x.GetHashMap64(), y.GetHashMap64()),
+                BymlNodeType.ArrayChangelog => _bymlArrayChangelogComparer.Equals(x.GetArrayChangelog(), y.GetArrayChangelog()),
                 BymlNodeType.Map => _mapComparer.Equals(x.GetMap(), y.GetMap()),
                 BymlNodeType.Array => _arrayComparer.Equals(x.GetArray(), y.GetArray()),
                 BymlNodeType.String => x.Value.GetHashCode() == y.Value.GetHashCode(),
