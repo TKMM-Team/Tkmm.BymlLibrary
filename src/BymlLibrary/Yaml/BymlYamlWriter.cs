@@ -72,7 +72,7 @@ public static class BymlYamlWriter
                 WriteDouble(ref emitter, ref formattedFloatBuffer, byml.GetDouble());
                 break;
             case BymlNodeType.Changelog:
-                emitter.Tag("!changelog");
+                emitter.SetTag("!changelog");
                 emitter.WriteString(byml.GetChangelog().ToString());
                 break;
             case BymlNodeType.Null:
@@ -144,7 +144,7 @@ public static class BymlYamlWriter
                 WriteDouble(ref emitter, ref formattedFloatBuffer, byml.GetDouble());
                 break;
             case BymlNodeType.Changelog:
-                emitter.Tag("!changelog");
+                emitter.SetTag("!changelog");
                 emitter.WriteString(byml.GetChangelog().ToString());
                 break;
             case BymlNodeType.Null:

@@ -1,10 +1,9 @@
 ﻿using BymlLibrary.Extensions;
-using BymlLibrary.Nodes.Containers.HashMap;
 using BymlLibrary.Writers;
 using BymlLibrary.Yaml;
+using LiteYaml.Emitter;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using VYaml.Emitter;
 
 namespace BymlLibrary.Nodes.Containers;
 
@@ -20,7 +19,7 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
 
     public void EmitYaml(ref Utf8YamlEmitter emitter)
     {
-        emitter.Tag("!array_changelog");
+        emitter.SetTag("!array_changelog");
         emitter.BeginMapping();
 
         foreach (var (hash, (change, node)) in this) {

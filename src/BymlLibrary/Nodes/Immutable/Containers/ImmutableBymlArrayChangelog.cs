@@ -6,7 +6,7 @@ using Revrs;
 using Revrs.Extensions;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using VYaml.Emitter;
+using LiteYaml.Emitter;
 
 namespace BymlLibrary.Nodes.Immutable.Containers;
 
@@ -104,7 +104,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal unsafe void EmitYaml(ref Utf8YamlEmitter emitter, in ImmutableByml root)
     {
-        emitter.Tag("!array-changelog");
+        emitter.SetTag("!array-changelog");
         emitter.BeginMapping();
 
         foreach (var (index, change, node) in this) {
