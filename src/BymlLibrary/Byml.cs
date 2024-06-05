@@ -3,13 +3,13 @@ using BymlLibrary.Nodes.Containers;
 using BymlLibrary.Nodes.Containers.HashMap;
 using BymlLibrary.Writers;
 using BymlLibrary.Yaml;
+using LiteYaml.Emitter;
 using Revrs;
 using Revrs.Buffers;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
-using LiteYaml.Emitter;
 
 namespace BymlLibrary;
 
@@ -72,8 +72,15 @@ public sealed class Byml
 
     public static Byml FromBinary(Span<byte> data)
     {
+        return FromBinary(data, out _, out _);
+    }
+
+    public static Byml FromBinary(Span<byte> data, out Endianness endianness, out ushort version)
+    {
         RevrsReader reader = new(data);
         ImmutableByml byml = new(ref reader);
+        endianness = byml.Endianness;
+        version = byml.Header.Version;
         return FromImmutable(byml, byml);
     }
 
