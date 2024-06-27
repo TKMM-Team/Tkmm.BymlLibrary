@@ -90,6 +90,11 @@ internal class BymlWriter
             }
             else {
                 Writer.Seek(offset);
+
+                if (node.Value is (byte[] _, int alignment)) {
+                    currentPosition += currentPosition.AlignUp(alignment) - 8;
+                }
+
                 Writer.Write(currentPosition);
                 Writer.Seek(currentPosition);
                 Write(node);
@@ -150,10 +155,10 @@ internal class BymlWriter
                 break;
             }
             case BymlNodeType.BinaryAligned: {
-                (byte[] alignedData, int alignment) = byml.GetBinaryAligned();
-                Writer.Write(alignedData.Length);
+                (byte[] data, int alignment) = byml.GetBinaryAligned();
+                Writer.Write(data.Length);
                 Writer.Write(alignment);
-                Writer.Write(alignedData);
+                Writer.Write(data);
                 break;
             }
             case BymlNodeType.Int64: {
