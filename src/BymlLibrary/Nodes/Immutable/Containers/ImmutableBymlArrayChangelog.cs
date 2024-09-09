@@ -109,7 +109,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
 
         foreach (var (index, change, node) in this) {
             emitter.WriteInt32(index);
-            emitter.BeginMapping(MappingStyle.Flow);
+            emitter.BeginMapping();
             {
                 emitter.WriteString(change.ToString());
                 BymlYamlWriter.Write(ref emitter, node, root);
