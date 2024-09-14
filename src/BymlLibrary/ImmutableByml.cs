@@ -8,7 +8,7 @@ using Revrs.Extensions;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Text;
-using LiteYaml.Emitter;
+using VYaml.Emitter;
 
 namespace BymlLibrary;
 

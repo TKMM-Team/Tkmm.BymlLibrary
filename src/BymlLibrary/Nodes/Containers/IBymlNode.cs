@@ -1,5 +1,5 @@
 ﻿using BymlLibrary.Writers;
-using LiteYaml.Emitter;
+using VYaml.Emitter;
 
 namespace BymlLibrary.Nodes.Containers;
 

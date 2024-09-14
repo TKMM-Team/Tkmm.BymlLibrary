@@ -1,9 +1,9 @@
-﻿using BymlLibrary.Extensions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using BymlLibrary.Extensions;
 using BymlLibrary.Writers;
 using BymlLibrary.Yaml;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using LiteYaml.Emitter;
+using VYaml.Emitter;
 
 namespace BymlLibrary.Nodes.Containers.HashMap;
 
@@ -19,7 +19,7 @@ public class BymlHashMap32 : SortedDictionary<uint, Byml>, IBymlNode
 
     public void EmitYaml(ref Utf8YamlEmitter emitter)
     {
-        emitter.SetTag("!h32");
+        emitter.Tag("!h32");
         emitter.BeginMapping((Count < Byml.YamlConfig.InlineContainerMaxCount && !HasContainerNodes()) switch {
             true => MappingStyle.Flow,
             false => MappingStyle.Block,
