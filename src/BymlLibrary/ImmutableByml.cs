@@ -290,6 +290,9 @@ public readonly ref struct ImmutableByml
             case BymlNodeType.Array:
                 ImmutableBymlArray.Reverse(ref reader, offset, header.Count, reversedOffsets);
                 break;
+            case BymlNodeType.ArrayChangelog:
+                ImmutableBymlArrayChangelog.Reverse(ref reader, offset, header.Count, reversedOffsets);
+                break;
             case BymlNodeType.Map:
                 ImmutableBymlMap.Reverse(ref reader, offset, header.Count, reversedOffsets);
                 break;
