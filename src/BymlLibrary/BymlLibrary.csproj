@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Revrs" Version="1.0.6" />
-    <PackageReference Include="VYaml" Version="0.27.1" />
+    <PackageReference Include="VYaml" Version="0.28.1" />
   </ItemGroup>
 
 </Project>
