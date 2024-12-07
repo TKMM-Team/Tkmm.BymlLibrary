@@ -39,7 +39,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get {
             Entry entry = _entries[index];
-            return new(entry.Index, entry.Change, _data, entry.Value, _types[index]);
+            return new ImmutableBymlArrayChangelogEntry(entry.Index, entry.Change, _data, entry.Value, _types[index]);
         }
     }
 
@@ -64,8 +64,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly Enumerator GetEnumerator()
-        => new(this);
+    public Enumerator GetEnumerator() => new(this);
 
     [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref struct Enumerator(ImmutableBymlArrayChangelog container)
@@ -81,11 +80,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
-            if (++_index >= _container.Count) {
-                return false;
-            }
-
-            return true;
+            return ++_index < _container.Count;
         }
     }
 
@@ -93,20 +88,22 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     public BymlArrayChangelog ToMutable(in ImmutableByml root)
     {
         BymlArrayChangelog arrayChangelog = [];
-        foreach (var (key, change, value) in this) {
-            arrayChangelog[key] = (change, Byml.FromImmutable(value, root));
+        foreach ((int index, BymlChangeType change, ImmutableByml value) in this) {
+            arrayChangelog.Add(
+                (index, change, Byml.FromImmutable(value, root))
+            );
         }
 
         return arrayChangelog;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal unsafe void EmitYaml(ref Utf8YamlEmitter emitter, in ImmutableByml root)
+    internal void EmitYaml(ref Utf8YamlEmitter emitter, in ImmutableByml root)
     {
         emitter.Tag("!array-changelog");
         emitter.BeginMapping();
 
-        foreach (var (index, change, node) in this) {
+        foreach ((int index, BymlChangeType change, ImmutableByml node) in this) {
             emitter.WriteInt32(index);
             emitter.BeginMapping();
             {
@@ -124,11 +121,11 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     {
         for (int i = 0; i < count; i++) {
             Entry entry = reader.Read<Entry, Entry.Reverser>(
-                offset + BymlContainer.SIZE + (Entry.SIZE * i)
+                offset + BymlContainer.SIZE + Entry.SIZE * i
             );
 
             ImmutableByml.ReverseNode(ref reader, entry.Value,
-                reader.Read<BymlNodeType>(offset + BymlContainer.SIZE + (Entry.SIZE * count) + i),
+                reader.Read<BymlNodeType>(offset + BymlContainer.SIZE + Entry.SIZE * count + i),
                 reversedOffsets
             );
         }

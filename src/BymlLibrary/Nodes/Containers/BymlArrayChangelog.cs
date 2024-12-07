@@ -6,13 +6,13 @@ using VYaml.Emitter;
 
 namespace BymlLibrary.Nodes.Containers;
 
-public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>, IBymlNode
+public class BymlArrayChangelog : List<(int, BymlChangeType, Byml)>, IBymlNode
 {
     public BymlArrayChangelog()
     {
     }
 
-    public BymlArrayChangelog(IDictionary<int, (BymlChangeType, Byml)> values) : base(values)
+    public BymlArrayChangelog(IEnumerable<(int, BymlChangeType, Byml)> values) : base(values)
     {
     }
 
@@ -21,8 +21,8 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
         emitter.Tag("!array_changelog");
         emitter.BeginMapping();
 
-        foreach (var (hash, (change, node)) in this) {
-            emitter.WriteInt32(hash);
+        foreach ((int index, BymlChangeType change, Byml node) in this) {
+            emitter.WriteInt32(index);
             emitter.BeginMapping(MappingStyle.Flow);
             {
                 emitter.WriteString(change.ToString());
@@ -36,7 +36,7 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
 
     public bool HasContainerNodes()
     {
-        foreach (var (_, (_, node)) in this) {
+        foreach ((_, _, Byml node) in this) {
             if (node.Type.IsContainerType()) {
                 return true;
             }
@@ -48,8 +48,8 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
     public int GetValueHash()
     {
         HashCode hashCode = new();
-        foreach (var (key, (change, node)) in this) {
-            hashCode.Add(key);
+        foreach ((int index, BymlChangeType change, Byml node) in this) {
+            hashCode.Add(index);
             hashCode.Add(change);
             hashCode.Add(Byml.ValueEqualityComparer.Default.GetHashCode(node));
         }
@@ -61,8 +61,8 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
     int IBymlNode.Collect(in BymlWriter writer)
     {
         HashCode hashCode = new();
-        foreach (var (key, (change, node)) in this) {
-            hashCode.Add(key);
+        foreach ((int index, BymlChangeType change, Byml node) in this) {
+            hashCode.Add(index);
             hashCode.Add(change);
             hashCode.Add(writer.Collect(node));
         }
@@ -74,13 +74,13 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
     void IBymlNode.Write(BymlWriter context, Action<Byml> write)
     {
         context.WriteContainerHeader(BymlNodeType.ArrayChangelog, Count);
-        foreach (var (key, (change, node)) in this) {
-            context.Writer.Write(key);
+        foreach ((int index, BymlChangeType change, Byml node) in this) {
+            context.Writer.Write(index);
             context.Writer.Write(change);
             write(node);
         }
 
-        foreach ((_, Byml node) in Values) {
+        foreach ((_, _, Byml node) in this) {
             context.Writer.Write(node.Type);
         }
 
@@ -95,29 +95,25 @@ public class BymlArrayChangelog : SortedDictionary<int, (BymlChangeType, Byml)>,
                 return y == x;
             }
 
-            if (x.Count != y.Count) {
-                return false;
-            }
-
-            return x.Keys.SequenceEqual(y.Keys) && x.Values.SequenceEqual(y.Values, EntryValueEqualityComparer.Default);
+            return x.Count == y.Count && x.SequenceEqual(y, EntryValueEqualityComparer.Default);
         }
 
-        public int GetHashCode([DisallowNull] BymlArrayChangelog obj)
+        public int GetHashCode(BymlArrayChangelog obj)
         {
             throw new NotImplementedException();
         }
     }
 
-    private class EntryValueEqualityComparer : IEqualityComparer<(BymlChangeType Change, Byml Node)>
+    private class EntryValueEqualityComparer : IEqualityComparer<(int Index, BymlChangeType Change, Byml Node)>
     {
         public static readonly EntryValueEqualityComparer Default = new();
 
-        public bool Equals((BymlChangeType Change, Byml Node) x, (BymlChangeType Change, Byml Node) y)
+        public bool Equals((int Index, BymlChangeType Change, Byml Node) x, (int Index, BymlChangeType Change, Byml Node) y)
         {
             return x.Change == y.Change && Byml.ValueEqualityComparer.Default.Equals(x.Node, y.Node);
         }
 
-        public int GetHashCode([DisallowNull] (BymlChangeType, Byml) obj)
+        public int GetHashCode((int, BymlChangeType, Byml) obj)
         {
             throw new NotImplementedException();
         }

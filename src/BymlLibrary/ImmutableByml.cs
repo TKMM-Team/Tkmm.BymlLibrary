@@ -47,7 +47,7 @@ public readonly ref struct ImmutableByml
                 $"Invalid BYML magic: '{Encoding.UTF8.GetString(BitConverter.GetBytes(Header.Magic))}'");
         }
 
-        if (Header.Version < 2 || Header.Version > 7) {
+        if (Header.Version is < 2 or > 7) {
             throw new InvalidDataException(
                 $"Unsupported BYML version: '{Header.Version}'");
         }
@@ -56,7 +56,7 @@ public readonly ref struct ImmutableByml
             reader.Seek(Header.KeyTableOffset);
             ref BymlContainer keyTableHeader
                 = ref CheckContainerHeader(ref reader, BymlNodeType.StringTable);
-            KeyTable = new(_data, Header.KeyTableOffset, keyTableHeader.Count);
+            KeyTable = new ImmutableBymlStringTable(_data, Header.KeyTableOffset, keyTableHeader.Count);
 
             if (reader.Endianness.IsNotSystemEndianness()) {
                 ImmutableBymlStringTable.Reverse(ref reader, Header.KeyTableOffset, keyTableHeader.Count);
@@ -67,7 +67,7 @@ public readonly ref struct ImmutableByml
             reader.Seek(Header.StringTableOffset);
             ref BymlContainer stringTableHeader
                 = ref CheckContainerHeader(ref reader, BymlNodeType.StringTable);
-            StringTable = new(_data, Header.StringTableOffset, stringTableHeader.Count);
+            StringTable = new ImmutableBymlStringTable(_data, Header.StringTableOffset, stringTableHeader.Count);
 
             if (reader.Endianness.IsNotSystemEndianness()) {
                 ImmutableBymlStringTable.Reverse(ref reader, Header.KeyTableOffset, stringTableHeader.Count);
@@ -75,7 +75,7 @@ public readonly ref struct ImmutableByml
         }
 
         if (reader.Endianness.IsNotSystemEndianness()) {
-            // So much for 0 allocation :sadge:
+            // So much for 0 allocation
             HashSet<int> reversedOffsets = [
                 Header.KeyTableOffset,
                 Header.StringTableOffset,
@@ -86,7 +86,7 @@ public readonly ref struct ImmutableByml
         }
 
         ref BymlContainer rootNodeHeader
-            = ref _data[(_value = new(Header.RootNodeOffset)).Offset..].Read<BymlContainer>();
+            = ref _data[(_value = new BymlValue(Header.RootNodeOffset)).Offset..].Read<BymlContainer>();
         Type = rootNodeHeader.Type;
         Endianness = reader.Endianness;
     }
@@ -94,7 +94,7 @@ public readonly ref struct ImmutableByml
     internal ImmutableByml(Span<byte> data, int value, BymlNodeType type)
     {
         _data = data;
-        _value = new(value);
+        _value = new BymlValue(value);
         Type = type;
     }
 
@@ -158,7 +158,7 @@ public readonly ref struct ImmutableByml
     {
         ref BymlContainer header
             = ref CheckContainerHeader(BymlNodeType.StringTable);
-        return new(_data, _value.Offset, header.Count);
+        return new ImmutableBymlStringTable(_data, _value.Offset, header.Count);
     }
 
     //
@@ -260,11 +260,9 @@ public readonly ref struct ImmutableByml
             return;
         }
 
-        if (reversedOffsets.Contains(value)) {
+        if (!reversedOffsets.Add(value)) {
             return;
         }
-
-        reversedOffsets.Add(value);
 
         if (type.IsContainerType()) {
             ReverseContainer(ref reader, value, reversedOffsets);

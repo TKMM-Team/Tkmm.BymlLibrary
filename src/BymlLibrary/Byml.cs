@@ -216,8 +216,8 @@ public sealed class Byml
         Value = hashMap64;
     }
 
-    public static implicit operator Byml(Dictionary<int, (BymlChangeType, Byml)> arrayChangelog) => new(arrayChangelog);
-    public Byml(IDictionary<int, (BymlChangeType, Byml)> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
+    public static implicit operator Byml(List<(int, BymlChangeType, Byml)> arrayChangelog) => new(arrayChangelog);
+    public Byml(IEnumerable<(int, BymlChangeType, Byml)> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
     {
     }
 

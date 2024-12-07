@@ -169,10 +169,11 @@ internal class BymlYamlReader
             int indexKey = parser.ReadScalarAsInt32();
 
             parser.SkipAfter(ParseEventType.MappingStart);
-            arrayChangelog[indexKey] = (
+            arrayChangelog.Add((
+                indexKey,
                 Enum.Parse<BymlChangeType>(parser.ReadScalarAsString() ?? string.Empty),
                 Parse(ref parser)
-            );
+            ));
             parser.SkipAfter(ParseEventType.MappingEnd);
         }
 
