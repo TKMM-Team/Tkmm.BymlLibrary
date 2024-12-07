@@ -21,9 +21,8 @@ internal class BymlYamlReader
             ParseEventType.MappingStart => ParseMap(ref parser),
             ParseEventType.SequenceStart => ParseSequence(ref parser),
             ParseEventType.Scalar => ParseScalar(ref parser),
-            _ => throw new NotSupportedException($"""
-                The event type '{parser.CurrentEventType}' is not supported
-                """)
+            _ => throw new NotSupportedException(
+                $"The event type '{parser.CurrentEventType}' is not supported")
         };
     }
 
@@ -36,7 +35,7 @@ internal class BymlYamlReader
                 return string.Empty;
             }
 
-            return new();
+            return new Byml();
         }
 
         if (parser.TryGetCurrentTag(out Tag tag)) {
@@ -48,13 +47,12 @@ internal class BymlYamlReader
                 "f" or "f32" => parser.ReadScalarAsFloat(),
                 "d" or "f64" => parser.ReadScalarAsDouble(),
                 "changelog" => Enum.Parse<BymlChangeType>(parser.ReadScalarAsString() ?? string.Empty),
-                "binary" or "tag:yaml.org,2002:binary" => Convert.FromBase64String(parser.ReadScalarAsString()
-                    ?? throw new InvalidDataException("""
-                        Invalid binary data, expected a base64 string
-                        """)),
-                _ => throw new InvalidDataException($"""
-                    Unexpected YAML scalar tag '{tag}'
-                    """)
+                "binary" or "tag:yaml.org,2002:binary" => Convert.FromBase64String(
+                    parser.ReadScalarAsString()
+                    ?? throw new InvalidDataException(
+                        "Invalid binary data, expected a base64 string")
+                ),
+                _ => throw new InvalidDataException($"Unexpected YAML scalar tag '{tag}'")
             };
         }
 
@@ -90,7 +88,7 @@ internal class BymlYamlReader
             return str ?? string.Empty;
         }
 
-        return new();
+        return new Byml();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -116,9 +114,8 @@ internal class BymlYamlReader
                 "h64" => ParseHashMap64(ref parser),
                 "file" => ParseFile(ref parser),
                 "array-changelog" => ParseArrayChangelog(ref parser),
-                _ => throw new InvalidDataException($"""
-                    Unexpected YAML map tag '{tag}' (expected '!h32', '!h64' or '!!file')
-                    """),
+                _ => throw new InvalidDataException(
+                    $"Unexpected YAML map tag '{tag}' (expected '!h32', '!h64' or '!!file')"),
             };
         }
 
@@ -192,9 +189,7 @@ internal class BymlYamlReader
         int alignment = parser.ReadScalarAsInt32();
         parser.SkipCurrentNode();
         string base64 = parser.ReadScalarAsString()
-            ?? throw new InvalidDataException("""
-                Invalid binary data, expected a base64 string
-                """);
+                        ?? throw new InvalidDataException("Invalid binary data, expected a base64 string");
 
         parser.SkipAfter(ParseEventType.MappingEnd);
         return (Convert.FromBase64String(base64), alignment);

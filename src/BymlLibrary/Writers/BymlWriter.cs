@@ -22,7 +22,7 @@ internal class BymlWriter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public BymlWriter(Byml byml, in Stream stream, Endianness endianness, ushort version)
     {
-        Writer = new(stream, endianness);
+        Writer = new RevrsWriter(stream, endianness);
         _version = version;
         Collect(_root = byml);
     }
@@ -39,7 +39,7 @@ internal class BymlWriter
         Write(_root);
 
         Writer.Seek(0);
-        Writer.Write<BymlHeader, BymlHeader.Reverser>(new(
+        Writer.Write<BymlHeader, BymlHeader.Reverser>(new BymlHeader(
             magic: Byml.BYML_MAGIC,
             version: _version,
             keyTableOffset,

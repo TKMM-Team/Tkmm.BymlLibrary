@@ -6,7 +6,7 @@ namespace BymlLibrary.Tests.Helpers;
 
 public class ZstdHelper
 {
-    private static readonly Lazy<ZstdHelper> _shared = new(() => new(TotkConfig.Shared.ZsDicPath));
+    private static readonly Lazy<ZstdHelper> _shared = new(() => new ZstdHelper(TotkConfig.Shared.ZsDicPath));
     public static ZstdHelper Shared => _shared.Value;
 
     private readonly Decompressor _defaultDecompressor = new();

@@ -37,9 +37,7 @@ public readonly ref struct ImmutableBymlArray(Span<byte> data, int offset, int c
 
     public readonly ImmutableByml this[int index] {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get {
-            return new(_data, _values[index], _types[index]);
-        }
+        get => new(_data, _values[index], _types[index]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

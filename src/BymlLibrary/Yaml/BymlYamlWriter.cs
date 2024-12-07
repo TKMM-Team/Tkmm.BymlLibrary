@@ -1,8 +1,8 @@
-﻿using BymlLibrary.Nodes.Containers;
-using BymlLibrary.Nodes.Immutable.Containers;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Globalization;
 using System.Text;
+using BymlLibrary.Nodes.Containers;
+using BymlLibrary.Nodes.Immutable.Containers;
 using VYaml.Emitter;
 
 namespace BymlLibrary.Yaml;
@@ -79,9 +79,8 @@ public static class BymlYamlWriter
                 emitter.WriteNull();
                 break;
             default:
-                throw new InvalidOperationException($"""
-                    Invalid or unsupported node type '{byml.Type}'
-                    """);
+                throw new InvalidOperationException(
+                    $"Invalid or unsupported node type '{byml.Type}'");
         }
     }
 

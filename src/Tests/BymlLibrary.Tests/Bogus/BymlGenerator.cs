@@ -75,7 +75,7 @@ public class BymlGenerator
         root.Add(BymlNodeType.Double.ToString(), double.Pi);
 
         // Null
-        root.Add(BymlNodeType.Null.ToString(), new());
+        root.Add(BymlNodeType.Null.ToString(), new Byml());
 
         return root;
     }

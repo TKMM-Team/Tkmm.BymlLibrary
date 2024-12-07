@@ -33,7 +33,7 @@ public readonly ref struct ImmutableBymlMap(Span<byte> data, int offset, int cou
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get {
             Entry entry = _entries[index];
-            return new(entry.KeyIndex, _data, entry.Value, entry.Type);
+            return new ImmutableBymlMapEntry(entry.KeyIndex, _data, entry.Value, entry.Type);
         }
     }
 
@@ -74,11 +74,7 @@ public readonly ref struct ImmutableBymlMap(Span<byte> data, int offset, int cou
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
-            if (++_index >= _container.Count) {
-                return false;
-            }
-
-            return true;
+            return ++_index < _container.Count;
         }
     }
 
@@ -117,7 +113,7 @@ public readonly ref struct ImmutableBymlMap(Span<byte> data, int offset, int cou
             false => MappingStyle.Block,
         });
 
-        foreach (var (stringIndex, node) in this) {
+        foreach ((int stringIndex, ImmutableByml node) in this) {
             BymlYamlWriter.WriteRawString(ref emitter, stringIndex, root.KeyTable);
             BymlYamlWriter.Write(ref emitter, node, root);
         }
@@ -128,7 +124,7 @@ public readonly ref struct ImmutableBymlMap(Span<byte> data, int offset, int cou
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool HasContainerNodes()
     {
-        foreach ((_, var node) in this) {
+        foreach ((_, ImmutableByml node) in this) {
             if (node.Type.IsContainerType()) {
                 return true;
             }

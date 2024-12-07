@@ -15,9 +15,9 @@ public class BymlNodeCache
                 return;
             }
 
-            if (!_storage.TryGetValue(node.Type, out var buckets)) {
+            if (!_storage.TryGetValue(node.Type, out List<Dictionary<int, (Byml Node, int? Offset)>>? buckets)) {
                 _storage[node.Type] = [
-                    new() {
+                    new Dictionary<int, (Byml Node, int? Offset)> {
                         { value, (node, null) }
                     }
                 ];
@@ -36,7 +36,7 @@ public class BymlNodeCache
             }
 
         Inject:
-            _hashes.Add(node, (value, index));
+            _hashes.Add(node, (Hash: value, Bucket: index));
         }
     }
 

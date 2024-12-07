@@ -1,14 +1,13 @@
-﻿using BymlLibrary.Extensions;
+﻿using System.Buffers;
+using System.Runtime.CompilerServices;
+using System.Text;
+using BymlLibrary.Extensions;
 using BymlLibrary.Nodes.Containers;
 using BymlLibrary.Nodes.Containers.HashMap;
 using BymlLibrary.Writers;
 using BymlLibrary.Yaml;
 using Revrs;
 using Revrs.Buffers;
-using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using System.Text;
 using VYaml.Emitter;
 
 namespace BymlLibrary;
@@ -108,43 +107,41 @@ public sealed class Byml
     {
         Byml result = byml.Type switch {
             BymlNodeType.HashMap32
-                => new(byml.GetHashMap32().ToMutable(root)),
+                => new Byml(byml.GetHashMap32().ToMutable(root)),
             BymlNodeType.HashMap64
-                => new(byml.GetHashMap64().ToMutable(root)),
+                => new Byml(byml.GetHashMap64().ToMutable(root)),
             BymlNodeType.ArrayChangelog
-                => new(byml.GetArrayChangelog().ToMutable(root)),
+                => new Byml(byml.GetArrayChangelog().ToMutable(root)),
             BymlNodeType.String
-                => new(root.StringTable[byml.GetStringIndex()].ToManaged()),
+                => new Byml(root.StringTable[byml.GetStringIndex()].ToManaged()),
             BymlNodeType.Binary
-                => new(byml.GetBinary().ToArray()),
+                => new Byml(byml.GetBinary().ToArray()),
             BymlNodeType.BinaryAligned
-                => new(byml.GetBinaryAligned(out int alignment).ToArray(), alignment),
+                => new Byml(byml.GetBinaryAligned(out int alignment).ToArray(), alignment),
             BymlNodeType.Array
-                => new(byml.GetArray().ToMutable(root)),
+                => new Byml(byml.GetArray().ToMutable(root)),
             BymlNodeType.Map
-                => new(byml.GetMap().ToMutable(root)),
+                => new Byml(byml.GetMap().ToMutable(root)),
             BymlNodeType.Bool
-                => new(byml.GetBool()),
+                => new Byml(byml.GetBool()),
             BymlNodeType.Int
-                => new(byml.GetInt()),
+                => new Byml(byml.GetInt()),
             BymlNodeType.Float
-                => new(byml.GetFloat()),
+                => new Byml(byml.GetFloat()),
             BymlNodeType.UInt32
-                => new(byml.GetUInt32()),
+                => new Byml(byml.GetUInt32()),
             BymlNodeType.Int64
-                => new(byml.GetInt64()),
+                => new Byml(byml.GetInt64()),
             BymlNodeType.UInt64
-                => new(byml.GetUInt64()),
+                => new Byml(byml.GetUInt64()),
             BymlNodeType.Double
-                => new(byml.GetDouble()),
+                => new Byml(byml.GetDouble()),
             BymlNodeType.Changelog
-                => new(BymlChangeType.Remove),
+                => new Byml(BymlChangeType.Remove),
             BymlNodeType.Null
-                => new(),
-
-            _ => throw new InvalidDataException($"""
-                Invalid or unsupported node type '{byml.Type}'
-                """)
+                => new Byml(),
+            _ => throw new InvalidDataException(
+                $"Invalid or unsupported node type '{byml.Type}'")
         };
 
         return result;
@@ -432,9 +429,8 @@ public sealed class Byml
         private static readonly BymlArrayChangelog.ValueEqualityComparer _bymlArrayChangelogComparer = new();
         private static readonly BymlArray.ValueEqualityComparer _arrayComparer = new();
         private static readonly BymlMap.ValueEqualityComparer _mapComparer = new();
-        private static readonly ValueEqualityComparer _default = new();
 
-        public static ValueEqualityComparer Default => _default;
+        public static readonly ValueEqualityComparer Default = new();
 
         public bool Equals(Byml? x, Byml? y)
         {
@@ -473,7 +469,7 @@ public sealed class Byml
             };
         }
 
-        public int GetHashCode([DisallowNull] Byml byml)
+        public int GetHashCode(Byml byml)
         {
             if (byml.Value is IBymlNode container) {
                 return container.GetValueHash();

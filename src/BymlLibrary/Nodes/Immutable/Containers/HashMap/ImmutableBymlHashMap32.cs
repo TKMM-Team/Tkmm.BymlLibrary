@@ -40,7 +40,7 @@ public readonly ref struct ImmutableBymlHashMap32(Span<byte> data, int offset, i
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get {
             Entry entry = _entries[index];
-            return new(entry.Hash, _data, entry.Value, _types[index]);
+            return new ImmutableBymlHashMap32Entry(entry.Hash, _data, entry.Value, _types[index]);
         }
     }
 
