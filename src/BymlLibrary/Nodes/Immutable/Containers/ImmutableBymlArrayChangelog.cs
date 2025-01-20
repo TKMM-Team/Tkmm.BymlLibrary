@@ -120,8 +120,10 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
             arrayChangelog.Add(
                 (index, change,
                     node: Byml.FromImmutable(value, root),
-                    keyPrimary: Byml.FromImmutable(keyPrimary, root),
-                    keySecondary: Byml.FromImmutable(keySecondary, root)
+                    keyPrimary: keyPrimary.Type is BymlNodeType.None
+                        ? null : Byml.FromImmutable(keyPrimary, root),
+                    keySecondary: keySecondary.Type is BymlNodeType.None
+                        ? null : Byml.FromImmutable(keySecondary, root)
                 )
             );
         }
