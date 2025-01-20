@@ -140,7 +140,7 @@ public sealed class Byml
                 => new Byml(byml.GetDouble()),
             BymlNodeType.Changelog
                 => new Byml(BymlChangeType.Remove),
-            BymlNodeType.Null
+            BymlNodeType.Null or BymlNodeType.None
                 => new Byml(),
             _ => throw new InvalidDataException(
                 $"Invalid or unsupported node type '{byml.Type}'")

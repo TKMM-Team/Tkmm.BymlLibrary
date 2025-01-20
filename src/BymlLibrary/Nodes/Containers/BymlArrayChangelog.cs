@@ -17,7 +17,7 @@ public class BymlArrayChangelog : List<BymlArrayChangelogEntry>, IBymlNode
 
     public void EmitYaml(ref Utf8YamlEmitter emitter)
     {
-        emitter.Tag("!array_changelog");
+        emitter.Tag("!array-changelog");
         emitter.BeginMapping();
 
         foreach ((int index, BymlChangeType change, Byml node, Byml? keyPrimary, Byml? keySecondary) in this) {

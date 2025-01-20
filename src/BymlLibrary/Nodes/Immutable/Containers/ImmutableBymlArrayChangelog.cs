@@ -82,6 +82,13 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
         public readonly BymlNodeType KeyPrimary;
         public readonly BymlNodeType KeySecondary;
         public readonly byte Unused;
+
+        public sealed class Reverser : IStructReverser
+        {
+            public static void Reverse(in Span<byte> slice)
+            {
+            }
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -162,7 +169,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
                 offset + BymlContainer.SIZE + Entry.SIZE * i
             );
             
-            var typeEntry = reader.Read<TypeEntry>(
+            TypeEntry typeEntry = reader.Read<TypeEntry, TypeEntry.Reverser>(
                 offset + BymlContainer.SIZE + Entry.SIZE * count + TypeEntry.SIZE * i
             );
 

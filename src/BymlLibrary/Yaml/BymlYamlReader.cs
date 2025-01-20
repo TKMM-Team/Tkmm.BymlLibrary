@@ -171,6 +171,8 @@ internal class BymlYamlReader
         while (parser.CurrentEventType is not ParseEventType.MappingEnd) {
             int indexKey = parser.ReadScalarAsInt32();
 
+            parser.SkipAfter(ParseEventType.MappingStart);
+            
             string? changeStr = parser.ReadScalarAsString();
             if (changeStr is "Key") {
                 parser.SkipAfter(ParseEventType.SequenceStart);
@@ -184,7 +186,6 @@ internal class BymlYamlReader
                 changeStr = parser.ReadScalarAsString();
             }
 
-            parser.SkipAfter(ParseEventType.MappingStart);
             arrayChangelog.Add((
                 indexKey,
                 change: Enum.Parse<BymlChangeType>(changeStr ?? string.Empty),
