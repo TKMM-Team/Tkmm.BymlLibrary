@@ -22,7 +22,7 @@ public enum BymlChangeType
 public enum BymlNodeType : byte
 {
     None = 0x0,
-    
+
     // A better solution could be
     // used for handling these map tyes
     HashMap32 = 0x20,
@@ -407,21 +407,15 @@ public sealed class Byml
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Get<T>()
     {
-        if (Value is null) {
-            throw new InvalidOperationException($"""
-                Cannot parse null node
-                """);
-        }
+        return Value switch {
+            T value => value,
+            null => throw new InvalidOperationException("Cannot parse null node"),
+            _ => throw new InvalidDataException($"""
+                Unexpected type: '{typeof(T)}'
 
-        if (Value is T value) {
-            return value;
-        }
-
-        throw new InvalidDataException($"""
-            Unexpected type: '{typeof(T)}'
-
-            Expected '{typeof(T)}' but found '{Value.GetType()} ({Type})'
-            """);
+                Expected '{typeof(T)}' but found '{Value.GetType()} ({Type})'
+                """)
+        };
     }
 
     public class ValueEqualityComparer : IEqualityComparer<Byml>

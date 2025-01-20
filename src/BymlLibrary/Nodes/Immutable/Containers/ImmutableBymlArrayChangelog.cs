@@ -64,7 +64,7 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
         {
             public static void Reverse(in Span<byte> slice)
             {
-                slice[0..4].Reverse();
+                slice[..4].Reverse();
                 slice[4..8].Reverse();
                 slice[8..12].Reverse();
                 slice[12..16].Reverse();
