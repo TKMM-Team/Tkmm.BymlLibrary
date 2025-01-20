@@ -31,26 +31,34 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     /// <summary>
     /// Container entry types
     /// </summary>
-    private readonly Span<BymlNodeType> _types = count == 0 ? []
-        : data[(offset + BymlContainer.SIZE + (Entry.SIZE * count))..]
-            .ReadSpan<BymlNodeType>(count);
+    private readonly Span<TypeEntry> _types = count == 0 ? []
+        : data[(offset + BymlContainer.SIZE + Entry.SIZE * count)..]
+            .ReadSpan<TypeEntry>(count);
 
     public readonly ImmutableBymlArrayChangelogEntry this[int index] {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get {
             Entry entry = _entries[index];
-            return new ImmutableBymlArrayChangelogEntry(entry.Index, entry.Change, _data, entry.Value, _types[index]);
+            TypeEntry typeEntry = _types[index];
+            return new ImmutableBymlArrayChangelogEntry(
+                entry.Index, entry.Change, _data,
+                entry.Node, typeEntry.Main,
+                entry.KeyPrimary, typeEntry.KeyPrimary,
+                entry.KeySecondary, typeEntry.KeySecondary
+            );
         }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 4, Size = SIZE)]
     private readonly struct Entry
     {
-        public const int SIZE = 12;
+        public const int SIZE = 20;
 
         public readonly int Index;
         public readonly BymlChangeType Change;
-        public readonly int Value;
+        public readonly int Node;
+        public readonly int KeyPrimary;
+        public readonly int KeySecondary;
 
         public class Reverser : IStructReverser
         {
@@ -59,8 +67,21 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
                 slice[0..4].Reverse();
                 slice[4..8].Reverse();
                 slice[8..12].Reverse();
+                slice[12..16].Reverse();
+                slice[16..20].Reverse();
             }
         }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = SIZE)]
+    private readonly struct TypeEntry
+    {
+        public const int SIZE = 4;
+
+        public readonly BymlNodeType Main;
+        public readonly BymlNodeType KeyPrimary;
+        public readonly BymlNodeType KeySecondary;
+        public readonly byte Unused;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,9 +109,13 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
     public BymlArrayChangelog ToMutable(in ImmutableByml root)
     {
         BymlArrayChangelog arrayChangelog = [];
-        foreach ((int index, BymlChangeType change, ImmutableByml value) in this) {
+        foreach ((int index, BymlChangeType change, ImmutableByml value, ImmutableByml keyPrimary, ImmutableByml keySecondary) in this) {
             arrayChangelog.Add(
-                (index, change, Byml.FromImmutable(value, root))
+                (index, change,
+                    node: Byml.FromImmutable(value, root),
+                    keyPrimary: Byml.FromImmutable(keyPrimary, root),
+                    keySecondary: Byml.FromImmutable(keySecondary, root)
+                )
             );
         }
 
@@ -103,10 +128,23 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
         emitter.Tag("!array-changelog");
         emitter.BeginMapping();
 
-        foreach ((int index, BymlChangeType change, ImmutableByml node) in this) {
+        foreach ((int index, BymlChangeType change, ImmutableByml node, ImmutableByml keyPrimary, ImmutableByml keySecondary) in this) {
             emitter.WriteInt32(index);
             emitter.BeginMapping();
             {
+                if (keyPrimary.Type is not BymlNodeType.None) {
+                    emitter.WriteString("Key");
+                    emitter.BeginSequence(SequenceStyle.Flow);
+                    {
+                        BymlYamlWriter.Write(ref emitter, keyPrimary, root);
+
+                        if (keySecondary.Type is not BymlNodeType.None) {
+                            BymlYamlWriter.Write(ref emitter, keySecondary, root);
+                        }
+                    }
+                    emitter.EndSequence();
+                }
+                
                 emitter.WriteString(change.ToString());
                 BymlYamlWriter.Write(ref emitter, node, root);
             }
@@ -123,9 +161,23 @@ public readonly ref struct ImmutableBymlArrayChangelog(Span<byte> data, int offs
             Entry entry = reader.Read<Entry, Entry.Reverser>(
                 offset + BymlContainer.SIZE + Entry.SIZE * i
             );
+            
+            var typeEntry = reader.Read<TypeEntry>(
+                offset + BymlContainer.SIZE + Entry.SIZE * count + TypeEntry.SIZE * i
+            );
 
-            ImmutableByml.ReverseNode(ref reader, entry.Value,
-                reader.Read<BymlNodeType>(offset + BymlContainer.SIZE + Entry.SIZE * count + i),
+            ImmutableByml.ReverseNode(ref reader,
+                entry.Node, typeEntry.Main,
+                reversedOffsets
+            );
+            
+            ImmutableByml.ReverseNode(ref reader,
+                entry.KeyPrimary, typeEntry.KeyPrimary,
+                reversedOffsets
+            );
+            
+            ImmutableByml.ReverseNode(ref reader,
+                entry.KeySecondary, typeEntry.KeySecondary,
                 reversedOffsets
             );
         }

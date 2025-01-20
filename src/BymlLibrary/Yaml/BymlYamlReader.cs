@@ -165,14 +165,32 @@ internal class BymlYamlReader
         BymlArrayChangelog arrayChangelog = [];
         parser.SkipAfter(ParseEventType.MappingStart);
 
+        Byml? keyPrimary = null;
+        Byml? keySecondary = null;
+
         while (parser.CurrentEventType is not ParseEventType.MappingEnd) {
             int indexKey = parser.ReadScalarAsInt32();
+
+            string? changeStr = parser.ReadScalarAsString();
+            if (changeStr is "Key") {
+                parser.SkipAfter(ParseEventType.SequenceStart);
+
+                while (parser.CurrentEventType is not ParseEventType.SequenceEnd) {
+                    keyPrimary ??= Parse(ref parser);
+                    keySecondary = Parse(ref parser);
+                }
+                
+                parser.SkipAfter(ParseEventType.SequenceEnd);
+                changeStr = parser.ReadScalarAsString();
+            }
 
             parser.SkipAfter(ParseEventType.MappingStart);
             arrayChangelog.Add((
                 indexKey,
-                Enum.Parse<BymlChangeType>(parser.ReadScalarAsString() ?? string.Empty),
-                Parse(ref parser)
+                change: Enum.Parse<BymlChangeType>(changeStr ?? string.Empty),
+                node: Parse(ref parser),
+                keyPrimary,
+                keySecondary
             ));
             parser.SkipAfter(ParseEventType.MappingEnd);
         }

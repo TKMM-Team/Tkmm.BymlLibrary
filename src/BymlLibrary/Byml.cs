@@ -21,6 +21,8 @@ public enum BymlChangeType
 
 public enum BymlNodeType : byte
 {
+    None = 0x0,
+    
     // A better solution could be
     // used for handling these map tyes
     HashMap32 = 0x20,
@@ -216,8 +218,8 @@ public sealed class Byml
         Value = hashMap64;
     }
 
-    public static implicit operator Byml(List<(int, BymlChangeType, Byml)> arrayChangelog) => new(arrayChangelog);
-    public Byml(IEnumerable<(int, BymlChangeType, Byml)> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
+    public static implicit operator Byml(List<BymlArrayChangelogEntry> arrayChangelog) => new(arrayChangelog);
+    public Byml(IEnumerable<BymlArrayChangelogEntry> arrayChangelog) : this(new BymlArrayChangelog(arrayChangelog))
     {
     }
 
