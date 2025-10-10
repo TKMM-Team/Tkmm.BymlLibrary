@@ -454,10 +454,10 @@ public sealed class Byml
                 BymlNodeType.Bool => x.GetBool() == y.GetBool(),
                 BymlNodeType.Int => x.GetInt() == y.GetInt(),
                 BymlNodeType.UInt32 => x.GetUInt32() == y.GetUInt32(),
-                BymlNodeType.Float => x.GetFloat() == y.GetFloat(),
+                BymlNodeType.Float => Math.Abs(x.GetFloat() - y.GetFloat()) < 0.0001,
                 BymlNodeType.Int64 => x.GetInt64() == y.GetInt64(),
                 BymlNodeType.UInt64 => x.GetUInt64() == y.GetUInt64(),
-                BymlNodeType.Double => x.GetDouble() == y.GetDouble(),
+                BymlNodeType.Double => Math.Abs(x.GetDouble() - y.GetDouble()) < 0.0001,
                 BymlNodeType.Changelog => x.GetChangelog() == y.GetChangelog(),
                 _ => throw new NotImplementedException($"""
                     A comparer for the node type '{x.Type}' is not implemented
