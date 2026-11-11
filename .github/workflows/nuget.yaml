@@ -44,8 +44,8 @@ jobs:
         shell: bash
         run: |-
           dotnet build src/${{ env.project_name }}/${{ env.project_name }}.csproj \
-          --no-restore                                                            \
-          -c Release                                                              \
+          --no-restore \
+          -c Release
 
       - name: Fetch Version
         id: version
@@ -55,23 +55,23 @@ jobs:
         shell: bash
         run: |
           dotnet pack src/${{ env.project_name }}/${{ env.project_name }}.csproj \
-          --no-restore                                                           \
-          -c Release                                                             \
-          -o ./build-output/                                                     \
-          -p:PackageId="${{ env.package_name }}"                                 \
-          -p:Authors="${{ env.authors }}"                                        \
-          -p:Description="${{ env.description }}"                                \
-          -p:PackageLicenseExpression="${{ env.spdx }}"                          \
-          -p:PackageProjectUrl="${{ env.repo }}"                                 \
-          -p:PackageReadmeFile="${{ env.readme }}"                               \
-          -p:PackageIcon="${{ env.icon }}"                                       \
-          -p:PackageTags='"${{ env.tags }}"'                                     \
-          -p:PackageVersion="${{ steps.version.outputs.version-without-v }}"     \
-          -p:RepositoryUrl="${{ env.repo }}"                                     \
+          --no-restore \
+          -c Release \
+          -o ./build-output/ \
+          -p:PackageId="${{ env.package_name }}" \
+          -p:Authors="${{ env.authors }}" \
+          -p:Description="${{ env.description }}" \
+          -p:PackageLicenseExpression="${{ env.spdx }}" \
+          -p:PackageProjectUrl="${{ env.repo }}" \
+          -p:PackageReadmeFile="${{ env.readme }}" \
+          -p:PackageIcon="${{ env.icon }}" \
+          -p:PackageTags='"${{ env.tags }}"' \
+          -p:PackageVersion="${{ steps.version.outputs.version-without-v }}" \
+          -p:RepositoryUrl="${{ env.repo }}"
 
       - name: Push
         shell: bash
         run: |-
           dotnet nuget push ./build-output/*.nupkg \
-          -k ${{ secrets.NUGET_AUTH }}             \
-          -s ${{ env.nuget }}                      \
+          -k ${{ secrets.NUGET_AUTH }} \
+          -s ${{ env.nuget }}
