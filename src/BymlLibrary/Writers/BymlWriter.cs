@@ -159,6 +159,7 @@ internal class BymlWriter
                 Writer.Write(data.Length);
                 Writer.Write(alignment);
                 Writer.Write(data);
+                Writer.Align(4);
                 break;
             }
             case BymlNodeType.Int64: {
