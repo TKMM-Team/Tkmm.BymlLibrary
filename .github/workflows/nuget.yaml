@@ -69,9 +69,15 @@ jobs:
           -p:PackageVersion="${{ steps.version.outputs.version-without-v }}" \
           -p:RepositoryUrl="${{ env.repo }}"
 
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push
         shell: bash
         run: |-
           dotnet nuget push ./build-output/*.nupkg \
-          -k ${{ secrets.NUGET_AUTH }} \
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }} \
           -s ${{ env.nuget }}
